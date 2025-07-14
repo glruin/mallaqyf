@@ -1,84 +1,73 @@
-const container = document.getElementById("malla-container");
-const aprobados = new Set();
+function crearMalla(malla) {
+  const mallaContainer = document.getElementById("malla-container");
 
-function crearRamo(ramo) {
-  const div = document.createElement("div");
-  div.className = "ramo bloqueado";
-  div.dataset.codigo = ramo.codigo;
-  div.dataset.prereqs = JSON.stringify(ramo.prereqs);
-  div.innerHTML = `${ramo.nombre}<br><span>${ramo.sct} SCT</span>`;
-  div.addEventListener("click", () => aprobarRamo(div));
-  return div;
-}
-
-function aprobarRamo(element) {
-  const codigo = element.dataset.codigo;
-  if (element.classList.contains("bloqueado")) return;
-
-  if (aprobados.has(codigo)) {
-    element.classList.remove("aprobado");
-    aprobados.delete(codigo);
-  } else {
-    element.classList.add("aprobado");
-    aprobados.add(codigo);
-  }
-  actualizarBloqueos();
-}
-
-function actualizarBloqueos() {
-  const ramos = document.querySelectorAll(".ramo");
-  ramos.forEach((ramo) => {
-    const prereqs = JSON.parse(ramo.dataset.prereqs);
-    const desbloqueado = prereqs.every((p) => aprobados.has(p) || p.startsWith("sem"));
-    if (desbloqueado) {
-      ramo.classList.remove("bloqueado");
-    } else {
-      ramo.classList.add("bloqueado");
-      ramo.classList.remove("aprobado");
-      aprobados.delete(ramo.dataset.codigo);
-    }
-  });
-}
-
-function renderizarMalla() {
-  malla.forEach((anioData) => {
-    const anioDiv = document.createElement("div");
-    anioDiv.className = "anio";
-
-    const anioTitulo = document.createElement("div");
-    anioTitulo.className = "anio-titulo";
-    anioTitulo.textContent = `Año ${anioData.anio}`;
-    anioDiv.appendChild(anioTitulo);
-
-    const semestresDiv = document.createElement("div");
-    semestresDiv.className = "semestres";
-
-    anioData.semestres.forEach((semestreData) => {
+  malla.forEach(anio => {
+    anio.semestres.forEach(semestre => {
       const semestreDiv = document.createElement("div");
       semestreDiv.className = "semestre";
 
-      const semestreTitulo = document.createElement("div");
-      semestreTitulo.className = "semestre-titulo";
-      semestreTitulo.textContent = `Semestre ${semestreData.semestre}`;
-      semestreDiv.appendChild(semestreTitulo);
+      const tituloAnio = document.createElement("div");
+      tituloAnio.className = "anio-titulo";
+      tituloAnio.textContent = `Año ${anio.anio}`;
+
+      const tituloSemestre = document.createElement("div");
+      tituloSemestre.className = "semestre-titulo";
+      tituloSemestre.textContent = `Semestre ${semestre.semestre}`;
+
+      semestreDiv.appendChild(tituloAnio);
+      semestreDiv.appendChild(tituloSemestre);
 
       const ramosDiv = document.createElement("div");
       ramosDiv.className = "ramos";
 
-      semestreData.ramos.forEach((ramo) => {
-        const ramoEl = crearRamo(ramo);
-        ramosDiv.appendChild(ramoEl);
+      semestre.ramos.forEach(ramo => {
+        const ramoDiv = document.createElement("div");
+        ramoDiv.className = "ramo bloqueado";
+        ramoDiv.setAttribute("data-codigo", ramo.codigo);
+        ramoDiv.setAttribute("data-prereqs", JSON.stringify(ramo.prereqs));
+
+        ramoDiv.innerHTML = `
+          ${ramo.nombre}
+          <span>${ramo.codigo}</span>
+          <span>${ramo.sct} SCT</span>
+        `;
+
+        ramoDiv.addEventListener("click", () => {
+          if (!ramoDiv.classList.contains("bloqueado")) {
+            ramoDiv.classList.toggle("aprobado");
+            actualizarEstadoRamos();
+          }
+        });
+
+        ramosDiv.appendChild(ramoDiv);
       });
 
       semestreDiv.appendChild(ramosDiv);
-      semestresDiv.appendChild(semestreDiv);
+      mallaContainer.appendChild(semestreDiv);
     });
-
-    anioDiv.appendChild(semestresDiv);
-    container.appendChild(anioDiv);
   });
 
-  actualizarBloqueos();
+  actualizarEstadoRamos(); // al inicio
 }
 
-renderizarMalla();
+function actualizarEstadoRamos() {
+  const todosLosRamos = document.querySelectorAll(".ramo");
+
+  todosLosRamos.forEach(ramo => {
+    const prereqs = JSON.parse(ramo.getAttribute("data-prereqs"));
+    const aprobados = Array.from(document.querySelectorAll(".ramo.aprobado")).map(r => r.getAttribute("data-codigo"));
+
+    const todosAprobados = prereqs.every(pr => aprobados.includes(pr));
+
+    if (todosAprobados) {
+      ramo.classList.remove("bloqueado");
+    } else {
+      if (!ramo.classList.contains("aprobado")) {
+        ramo.classList.add("bloqueado");
+      }
+    }
+  });
+}
+
+// Ejecutar al cargar
+crearMalla(malla);
