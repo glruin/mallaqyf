@@ -31,11 +31,12 @@ body {
   border: 2px solid #d9cfc4;
   border-radius: 1rem;
   min-width: 250px;
-  max-width: 300px;
+  max-width: 250px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 }
 
 .semestre-titulo {
@@ -43,6 +44,8 @@ body {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   color: #b58f84;
+  cursor: pointer;
+  user-select: none;
 }
 
 .anio-titulo {
@@ -70,10 +73,13 @@ body {
 font-family: 'Cheesecake', cursive;
   font-size: 1rem;
   line-height: 1.4;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .ramo span {
-  display: block;
   font-size: 0.85rem;
   color: #7b6a58;
 }
