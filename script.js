@@ -13,6 +13,23 @@ function crearMalla(malla) {
       const tituloSemestre = document.createElement("div");
       tituloSemestre.className = "semestre-titulo";
       tituloSemestre.textContent = `Semestre ${semestre.semestre}`;
+      let todosAprobados = false;
+
+tituloSemestre.addEventListener("click", () => {
+  const ramos = semestreDiv.querySelectorAll(".ramo:not(.bloqueado)");
+  todosAprobados = !todosAprobados;
+
+  ramos.forEach(ramo => {
+    if (todosAprobados) {
+      ramo.classList.add("aprobado");
+    } else {
+      ramo.classList.remove("aprobado");
+    }
+  });
+
+  actualizarEstadoRamos();
+});
+
 
       semestreDiv.appendChild(tituloAnio);
       semestreDiv.appendChild(tituloSemestre);
