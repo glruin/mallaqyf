@@ -1,0 +1,119 @@
+@font-face {
+  font-family: 'Cheesecake';
+  src: url('Cheesecake.ttf') format('truetype');
+}
+body {
+  font-family: 'Pinyon Script', cursive;
+  background: #fffafc;
+  margin: 0;
+  padding: 2rem;
+  color: #5f4b32;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 2rem;
+}
+
+.malla {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  overflow-x: auto;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.anio {
+  display: contents;
+}
+
+.anio-titulo {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: center;
+  font-size: 2rem;
+  color: #a2786a;
+  border-bottom: none;
+  border-left: 2px dashed #d9cfc4;
+  padding-left: 1rem;
+  margin-right: 1rem;
+  height: 100%;
+}
+
+.semestre {
+  background: #fff0f5;
+  padding: 1rem;
+  border: 2px solid #d9cfc4;
+  border-radius: 1rem;
+  min-width: 250px;
+  max-width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.semestre-titulo {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #b58f84;
+}
+
+.ramos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.ramo {
+  background: #fff8f2;
+  border: 1px solid #d6c7b7;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: 'Cheesecake', cursive;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.ramo span {
+  display: block;
+  font-size: 0.85rem;
+  color: #7b6a58;
+}
+
+.ramo:hover {
+  background: #fce4ec;
+}
+
+.bloqueado {
+  opacity: 0.5;
+  pointer-events: none;
+  background: #e5e5e5;
+  color: #aaa;
+}
+
+.aprobado {
+  background-color: #f7cad0 !important;
+  text-decoration: line-through;
+  color: #5e4b4b;
+}
+
+@media (max-width: 768px) {
+  .malla {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .semestre {
+    min-width: unset;
+    width: 90%;
+  }
+}
