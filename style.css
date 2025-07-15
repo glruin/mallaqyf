@@ -2,6 +2,7 @@
   font-family: 'Cheesecake';
   src: url('Cheesecake.ttf') format('truetype');
 }
+
 body {
   font-family: 'Pinyon Script', cursive;
   background: #fffafc;
@@ -90,6 +91,18 @@ body {
   color: #5e4b4b;
   margin-top: 2px;
   font-weight: bold;
+}
+
+.semestre-promedio {
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.4rem;
+  background-color: #fceae8;
+  border: 1px solid #e5c5c5;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  color: #5f4b32;
+  font-weight: bold;
+  text-align: center;
 }
 
 .ramo:hover {
