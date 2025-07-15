@@ -70,18 +70,26 @@ body {
   text-align: center;
   cursor: pointer;
   transition: 0.3s;
-font-family: 'Cheesecake', cursive;
+  font-family: 'Cheesecake', cursive;
   font-size: 0.75rem;
   line-height: 1.1;
-  height: 50px;
+  height: 60px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
 }
 
 .ramo span {
   font-size: 0.65rem;
   color: #7b6a58;
+}
+
+.promedio {
+  font-size: 0.7rem;
+  color: #5e4b4b;
+  margin-top: 2px;
+  font-weight: bold;
 }
 
 .ramo:hover {
@@ -106,12 +114,6 @@ font-family: 'Cheesecake', cursive;
     flex-direction: column;
     align-items: center;
   }
-
-  .semestre {
-    min-width: unset;
-    width: 90%;
-  }
-}
 
   .semestre {
     min-width: unset;
