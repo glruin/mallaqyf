@@ -14,6 +14,11 @@ function crearMalla(malla) {
       tituloSemestre.className = "semestre-titulo";
       tituloSemestre.textContent = `Semestre ${semestre.semestre}`;
 
+      const promedioSemestre = document.createElement("div");
+      promedioSemestre.className = "semestre-promedio";
+      promedioSemestre.id = `prom-sem-${anio.anio}-${semestre.semestre}`;
+      promedioSemestre.textContent = "Prom: -";
+
       semestreDiv.appendChild(tituloAnio);
       semestreDiv.appendChild(tituloSemestre);
 
@@ -39,6 +44,8 @@ function crearMalla(malla) {
         ramoDiv.className = "ramo bloqueado";
         ramoDiv.setAttribute("data-codigo", ramo.codigo);
         ramoDiv.setAttribute("data-prereqs", JSON.stringify(ramo.prereqs));
+        ramoDiv.setAttribute("data-anio", anio.anio);
+        ramoDiv.setAttribute("data-semestre", semestre.semestre);
 
         ramoDiv.innerHTML = `
           ${ramo.nombre}
@@ -47,7 +54,6 @@ function crearMalla(malla) {
           <div class="promedio" id="promedio-${ramo.codigo}"></div>
         `;
 
-        // Clic normal: marcar aprobado
         ramoDiv.addEventListener("click", () => {
           if (!ramoDiv.classList.contains("bloqueado")) {
             ramoDiv.classList.toggle("aprobado");
@@ -56,20 +62,19 @@ function crearMalla(malla) {
           }
         });
 
-        // Doble clic: ingresar notas
         ramoDiv.addEventListener("dblclick", (e) => {
           e.stopPropagation();
-          const notas = prompt("Ingresa tus notas separadas por coma (ej: 5.5,6.0,4.9):");
+          const notas = prompt("Ingresa tus notas separadas por coma (ej: 5.5, 6.0, 4.9):");
           if (notas) {
             const notasArr = notas.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
             const promedio = (notasArr.reduce((a, b) => a + b, 0) / notasArr.length).toFixed(2);
             const promedioEl = ramoDiv.querySelector(`#promedio-${ramo.codigo}`);
             promedioEl.textContent = `Prom: ${promedio}`;
             guardarNotas(ramo.codigo, notasArr);
+            actualizarPromedioSemestre(anio.anio, semestre.semestre);
           }
         });
 
-        // Restaurar estado desde localStorage
         const guardado = JSON.parse(localStorage.getItem(`ramo-${ramo.codigo}`));
         if (guardado) {
           if (guardado.aprobado) ramoDiv.classList.add("aprobado");
@@ -84,7 +89,10 @@ function crearMalla(malla) {
       });
 
       semestreDiv.appendChild(ramosDiv);
+      semestreDiv.appendChild(promedioSemestre);
       mallaContainer.appendChild(semestreDiv);
+
+      actualizarPromedioSemestre(anio.anio, semestre.semestre);
     });
   });
 
@@ -121,6 +129,29 @@ function guardarNotas(codigo, notas) {
   const guardado = JSON.parse(localStorage.getItem(`ramo-${codigo}`)) || {};
   guardado.notas = notas;
   localStorage.setItem(`ramo-${codigo}`, JSON.stringify(guardado));
+}
+
+function actualizarPromedioSemestre(anio, semestre) {
+  const ramos = document.querySelectorAll(`.ramo[data-anio='${anio}'][data-semestre='${semestre}']`);
+  let suma = 0;
+  let cantidad = 0;
+
+  ramos.forEach(ramo => {
+    const codigo = ramo.getAttribute("data-codigo");
+    const guardado = JSON.parse(localStorage.getItem(`ramo-${codigo}`));
+    if (guardado && guardado.notas && guardado.notas.length) {
+      const promedio = guardado.notas.reduce((a, b) => a + b, 0) / guardado.notas.length;
+      suma += promedio;
+      cantidad++;
+    }
+  });
+
+  const contenedor = document.getElementById(`prom-sem-${anio}-${semestre}`);
+  if (cantidad > 0) {
+    contenedor.textContent = `Prom Sem: ${(suma / cantidad).toFixed(2)}`;
+  } else {
+    contenedor.textContent = `Prom Sem: -`;
+  }
 }
 
 // Ejecutar
