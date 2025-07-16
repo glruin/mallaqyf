@@ -46,6 +46,7 @@ function crearMalla(malla) {
         ramoDiv.setAttribute("data-prereqs", JSON.stringify(ramo.prereqs));
         ramoDiv.setAttribute("data-anio", anio.anio);
         ramoDiv.setAttribute("data-semestre", semestre.semestre);
+        ramoDiv.setAttribute("data-sct", ramo.sct);
 
         ramoDiv.innerHTML = `
           ${ramo.nombre}
@@ -64,14 +65,18 @@ function crearMalla(malla) {
 
         ramoDiv.addEventListener("dblclick", (e) => {
           e.stopPropagation();
-          const notas = prompt("Ingresa tus notas separadas por coma (ej: 5.5, 6.0, 4.9):");
-          if (notas) {
-            const notasArr = notas.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
-            const promedio = (notasArr.reduce((a, b) => a + b, 0) / notasArr.length).toFixed(2);
+          const entrada = prompt("Ingresa tus notas con ponderaciones (ej: 6.0:40, 5.5:60):");
+          if (entrada) {
+            const pares = entrada.split(",").map(n => n.trim().split(":"));
+            const notas = pares.map(p => parseFloat(p[0]));
+            const pesos = pares.map(p => parseFloat(p[1] || 100));
+            const sumaPesos = pesos.reduce((a, b) => a + b, 0);
+            const promedio = (notas.reduce((acc, nota, i) => acc + nota * pesos[i], 0) / sumaPesos).toFixed(2);
             const promedioEl = ramoDiv.querySelector(`#promedio-${ramo.codigo}`);
             promedioEl.textContent = `Prom: ${promedio}`;
-            guardarNotas(ramo.codigo, notasArr);
+            guardarNotas(ramo.codigo, pares);
             actualizarPromedioSemestre(anio.anio, semestre.semestre);
+            actualizarPromedioGlobal();
           }
         });
 
@@ -80,7 +85,10 @@ function crearMalla(malla) {
           if (guardado.aprobado) ramoDiv.classList.add("aprobado");
           const promedioEl = ramoDiv.querySelector(`#promedio-${ramo.codigo}`);
           if (guardado.notas && guardado.notas.length) {
-            const promedio = (guardado.notas.reduce((a, b) => a + b, 0) / guardado.notas.length).toFixed(2);
+            const notas = guardado.notas.map(p => parseFloat(p[0]));
+            const pesos = guardado.notas.map(p => parseFloat(p[1] || 100));
+            const sumaPesos = pesos.reduce((a, b) => a + b, 0);
+            const promedio = (notas.reduce((acc, nota, i) => acc + nota * pesos[i], 0) / sumaPesos).toFixed(2);
             promedioEl.textContent = `Prom: ${promedio}`;
           }
         }
@@ -97,6 +105,8 @@ function crearMalla(malla) {
   });
 
   actualizarEstadoRamos();
+  mostrarPromedioGlobalContainer();
+  actualizarPromedioGlobal();
 }
 
 function actualizarEstadoRamos() {
@@ -125,34 +135,72 @@ function guardarEstadoRamo(ramoDiv) {
   localStorage.setItem(`ramo-${codigo}`, JSON.stringify(guardado));
 }
 
-function guardarNotas(codigo, notas) {
+function guardarNotas(codigo, pares) {
   const guardado = JSON.parse(localStorage.getItem(`ramo-${codigo}`)) || {};
-  guardado.notas = notas;
+  guardado.notas = pares;
   localStorage.setItem(`ramo-${codigo}`, JSON.stringify(guardado));
 }
 
 function actualizarPromedioSemestre(anio, semestre) {
   const ramos = document.querySelectorAll(`.ramo[data-anio='${anio}'][data-semestre='${semestre}']`);
   let suma = 0;
-  let cantidad = 0;
+  let totalCreditos = 0;
 
   ramos.forEach(ramo => {
     const codigo = ramo.getAttribute("data-codigo");
+    const sct = parseFloat(ramo.getAttribute("data-sct"));
     const guardado = JSON.parse(localStorage.getItem(`ramo-${codigo}`));
     if (guardado && guardado.notas && guardado.notas.length) {
-      const promedio = guardado.notas.reduce((a, b) => a + b, 0) / guardado.notas.length;
-      suma += promedio;
-      cantidad++;
+      const notas = guardado.notas.map(p => parseFloat(p[0]));
+      const pesos = guardado.notas.map(p => parseFloat(p[1] || 100));
+      const sumaPesos = pesos.reduce((a, b) => a + b, 0);
+      const promedio = notas.reduce((acc, nota, i) => acc + nota * pesos[i], 0) / sumaPesos;
+      suma += promedio * sct;
+      totalCreditos += sct;
     }
   });
 
   const contenedor = document.getElementById(`prom-sem-${anio}-${semestre}`);
-  if (cantidad > 0) {
-    contenedor.textContent = `Prom Sem: ${(suma / cantidad).toFixed(2)}`;
+  if (totalCreditos > 0) {
+    contenedor.textContent = `Prom Sem: ${(suma / totalCreditos).toFixed(2)}`;
   } else {
     contenedor.textContent = `Prom Sem: -`;
   }
 }
 
-// Ejecutar
+function mostrarPromedioGlobalContainer() {
+  const globalDiv = document.createElement("div");
+  globalDiv.className = "global-promedio";
+  globalDiv.id = "global-promedio";
+  globalDiv.textContent = "Promedio General: -";
+  document.body.appendChild(globalDiv);
+}
+
+function actualizarPromedioGlobal() {
+  const ramos = document.querySelectorAll(".ramo");
+  let suma = 0;
+  let totalCreditos = 0;
+
+  ramos.forEach(ramo => {
+    const codigo = ramo.getAttribute("data-codigo");
+    const sct = parseFloat(ramo.getAttribute("data-sct"));
+    const guardado = JSON.parse(localStorage.getItem(`ramo-${codigo}`));
+    if (guardado && guardado.notas && guardado.notas.length) {
+      const notas = guardado.notas.map(p => parseFloat(p[0]));
+      const pesos = guardado.notas.map(p => parseFloat(p[1] || 100));
+      const sumaPesos = pesos.reduce((a, b) => a + b, 0);
+      const promedio = notas.reduce((acc, nota, i) => acc + nota * pesos[i], 0) / sumaPesos;
+      suma += promedio * sct;
+      totalCreditos += sct;
+    }
+  });
+
+  const contenedor = document.getElementById("global-promedio");
+  if (totalCreditos > 0) {
+    contenedor.textContent = `Promedio General: ${(suma / totalCreditos).toFixed(2)}`;
+  } else {
+    contenedor.textContent = `Promedio General: -`;
+  }
+}
+
 crearMalla(malla);
